@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Ticket</title>
+    <!-- link to css -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Pustaka html5-qrcode lokal -->
+    <script src="{{ url_for('static', filename='html5-qrcode-master/minified/html5-qrcode.min.js') }}"></script>
+</head>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="card-wrapper">
+            <div class="card-left">
+                <div class="card-left-logo">
+                    <h2>SecureTicket</h2>
+                </div>
+                <div class="card-left-content">
+                    <form id="generate-form">
+                        <label class="input">
+                            <input class="input_field" type="text" name="nama" placeholder=" " required>
+                            <span class="input_label">Nama</span>
+                        </label>
+                        <label class="input">
+                            <input class="input_field" type="email" name="email" placeholder=" " required>
+                            <span class="input_label">Email</span>
+                        </label>
+                        <label class="input">
+                            <input class="input_field" type="number" name="no_hp" placeholder=" " required>
+                            <span class="input_label">No HP</span>
+                        </label>
+                        <label class="input_">
+                            <span class="input_label">Tempat Duduk</span>
+                            <select name="tempat_duduk" id="tempat_duduk" required>
+                                <option value="Tengah">Tengah</option>
+                                <option value="Depan">Depan</option>
+                                <option value="Balkon">Balkon</option>
+                            </select>
+                        </label>
+                        <!-- <label class="input">
+                            <input class="input_field" type="number" name="jumlah_tiket" placeholder="" min="1" required>
+                            <span class="input_label">Jumlah Tiket</span>
+                        </label> -->
+                    </form>
+                </div>
+            </div>
+    
+            <div class="card-right" id="card-right">
+                <div class="card-right-content-button">
+                    <button id="submit-button" type="button">Book Now</button>
+                </div>
+            </div>
+        </div>
+    
+        <div class="divider"></div>
+    
+        <div class="scan-containner">
+            <div class="btn-container">
+                <input type="file" id="qr-file">
+                <button class="scan-btn">
+                    <h2>Scan Qr Code</h2>
+                </button>
+            </div>
+            <div id="reader"></div>
+            <!-- <div id="scan-result"></div> -->
+        </div>
+    </div>
+
+    <div class="log-container">
+        <h3>Activity Log</h3>
+        <div id="log-list"></div>
+    </div>
+
+    <script>
+        // ==== BAGIAN INPUT DATA PEMESANAN ====
+        document.getElementById('submit-button').addEventListener('click', () => {
+            const logContainer = document.querySelector('.log-container');
+            
+            // Tampilkan log-container jika belum terlihat
+            if (!logContainer.classList.contains('visible')) {
+                logContainer.classList.add('visible');
+            }
+
+            addLog("Melakukan Proses Pemesanan...");
+            document.getElementById('generate-form').requestSubmit();
+        });
+
+        function addLog(message, details = '') {
+            const logList = document.getElementById('log-list'); // Ambil elemen log-list
+            const logEntry = document.createElement('li'); // Buat elemen <li> untuk log baru
+
+            // Format log message dengan waktu dan detail
+            logEntry.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}:</strong> ${message}
+                ${details ? `<div class="log-details">${details}</div>` : ''}
+            `;
+            logList.appendChild(logEntry); // Tambahkan log baru ke log-list
+
+            // Scroll otomatis ke log terbaru
+            logList.scrollDown = logList.scrollHeight;
+        }
+
+        document.getElementById('generate-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const cardRight = document.getElementById('card-right');
+
+            try {
+                const response = await fetch('/generate', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Ganti konten `card-right` dengan tickets-container
+                    cardRight.innerHTML = `
+                        <div id="tickets-container" class="tickets-container">
+                            <!-- Tickets will be dynamically added here -->
+                        </div>
+                    `;
+                    const ticketsContainer = document.getElementById('tickets-container');
+
+                    result.tickets.forEach((ticket, index) => {
+                        const ticketDiv = document.createElement('div');
+                        ticketDiv.classList.add('ticket-wrapper');
+                        ticketDiv.style.marginBottom = "0";
+                        ticketDiv.innerHTML = `
+                            <img src="data:image/png;base64,${ticket.qr_image}" alt="QR Code Tiket ${index + 1}">
+                        `;
+                        ticketsContainer.appendChild(ticketDiv);
+                    });
+
+                    addLog('Tiket berhasil dibuat.');
+
+                    result.tickets.forEach((ticket, index) => {
+                        const ticketDetails = `
+                            <p><strong>ID:</strong> ${ticket.id_tiket}</p>
+                            <p><strong>Nama:</strong> ${formData.get('nama')}</p>
+                            <p><strong>Email:</strong> ${formData.get('email')}</p>
+                            <p><strong>No HP:</strong> ${formData.get('no_hp')}</p>
+                            <p><strong>Tempat Duduk:</strong> ${formData.get('tempat_duduk')}</p>
+                            <p><strong>Chipertext:</strong> ${ticket.ciphertext}</p>
+                        `;
+                        addLog(`Tiket ${index + 1}`, ticketDetails);
+                    });
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error("Error saat generate QR Code:", error);
+            }
+        };
+    </script>
+
+    <script>
+        // ==== BAGIAN SCAN QR CODE DARI FILE ====
+        // Fungsi untuk membuat elemen div#scan-result secara dinamis
+        function createScanResultDiv() {
+            // Cek apakah elemen sudah ada
+            if (!document.getElementById('scan-result')) {
+                const scanContainer = document.querySelector('.scan-containner'); // Ambil kontainer utama
+                const scanResultDiv = document.createElement('div'); // Buat elemen div baru
+                const logcontainer = document.querySelector('.log-container'); // Ambil kontainer log
+                scanResultDiv.id = 'scan-result'; // Berikan ID ke div
+                scanContainer.appendChild(scanResultDiv); // Tambahkan ke dalam kontainer
+
+                if(!logcontainer.classList.contains('visible')) {
+                    logcontainer.classList.add('visible');
+                }
+
+                addLog("Melakukan Proses Scan QR Code...");
+            }
+        }
+        
+        function addLog(message, details = '') {
+            const logList = document.getElementById('log-list'); // Ambil elemen log-list
+            const logEntry = document.createElement('li'); // Buat elemen <li> untuk log baru
+
+            logEntry.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}:</strong> ${message}
+                ${details ? `<div class="log-details">${details}</div>` : ''}
+            `;
+            logList.appendChild(logEntry); // Tambahkan log baru ke log-list
+
+            // Scroll otomatis ke log terbaru
+            logList.scrollDown = logList.scrollHeight;
+        }
+
+        // Tambahkan event listener ke input file
+        document.getElementById('qr-file').addEventListener('change', function (e) {
+            createScanResultDiv(); // Pastikan elemen #scan-result ada sebelum digunakan
+
+            const file = e.target.files[0]; // Ambil file yang diunggah
+            if (!file) {
+                alert("Silakan pilih file QR Code.");
+                return;
+            }
+
+            const html5QrCode = new Html5Qrcode("reader"); // Inisialisasi QR scanner
+            html5QrCode.scanFile(file, false)
+                .then(decodedText => {
+                    const cleanedData = decodedText.trim(); // Data terenkripsi dari QR Code
+                    console.log("Data QR Code terenkripsi:", cleanedData);
+
+                    // Tampilkan hasil scan di UI
+                    const scanResultContainer = document.getElementById('scan-result');
+                    scanResultContainer.innerHTML = `<p><strong>Hasil Scan:</strong> ${cleanedData}</p>`;
+
+                    // Kirim data terenkripsi ke backend untuk dekripsi
+                    fetch('/decrypt', {
+                        method: 'POST',
+                        body: new URLSearchParams({ 'encrypted_data': cleanedData }),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.status === 'success') {
+                            console.log("Data berhasil didekripsi:", result);
+
+                            // Tampilkan hasil dekripsi di UI
+                            const decryptedResult = `
+                                <p><strong>Ciphertext:</strong> ${cleanedData}</p>
+                                <p><strong>Plaintext:</strong> ${result.decrypted_data}</p>
+                                <p><strong>ID Tiket:</strong> ${result.decrypted_data}</p>
+                                <p><strong>Nama:</strong> ${result.ticket_data.nama}</p>
+                                <p><strong>Email:</strong> ${result.ticket_data.email}</p>
+                                <p><strong>No HP:</strong> ${result.ticket_data.no_hp}</p>
+                                <p><strong>Tempat Duduk:</strong> ${result.ticket_data.tempat_duduk}</p>
+                                <p><strong>Tanggal Pemesanan:</strong> ${result.ticket_data.tanggal_pesan}</p>
+                            `;
+                            scanResultContainer.innerHTML += decryptedResult; // Tambahkan hasil dekripsi ke UI
+                            addLog("Data berhasil didekripsi.", decryptedResult);
+                        } else {
+                            console.error("Error dari server:", result.message);
+                            scanResultContainer.innerHTML = `<p><strong>Error:</strong> ${result.message}</p>`;
+                            addLog("Error dari server:", result.message);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error saat menghubungi server:", err);
+                        scanResultContainer.innerHTML = `<p><strong>Error:</strong> Tidak dapat menghubungi server.</p>`;
+                        addLog("Gagal menghubungi server untuk dekripsi.");
+                    });
+                })
+                .catch(err => {
+                    console.error("Error membaca QR Code:", err);
+                    document.getElementById('scan-result').innerHTML = `<p><strong>Error:</strong> Gagal membaca QR Code.</p>`;
+                    addLog("Gagal membaca QR Code.");
+                });
+        });
+
+    </script>
+    
+</body>
+</html>

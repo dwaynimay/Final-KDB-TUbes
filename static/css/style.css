@@ -1,0 +1,352 @@
+
+
+:root {
+    --card-prmary-color: white;
+    --card-secondary-color: #212121;
+    --card-third-color: #fab700;
+    font-family: 'consolas', sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--card-secondary-color);
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 11rem;
+    box-sizing: border-box;
+}
+
+.card-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 50rem;
+    height: 20.53rem;
+    background-color: var(--card-prmary-color);
+    border-radius: 0.2rem;
+    border: 0.5rem solid var(--card-secondary-color);
+    box-shadow: 15px 15px 0 -10px var(--card-third-color);
+}
+
+.card-left {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: 100%;
+    background-color: var(--card-third-color);
+    color: var(--card--color);
+    padding: 2rem;
+}
+
+.card-left-logo {
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.card-left-content-logo img {
+    width: 100%;
+    height: 100%;
+}
+
+.card-left-content {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.card-left-content form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.card-left-content .input{
+    position: relative;
+}
+
+.card-left-content .input .input_label{
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 0.4rem;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap;
+    transform: translate(0,0);
+    transform-origin: 0 0;
+    font-weight: bold;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.input_field:focus,
+.input_field:not(:placeholder-shown) {
+    border-color: var(--card-primary-color);
+    background-color: var(--card-primary-color);
+    color: var(--card-secondary-color);
+}
+
+.input_field:focus + .input_label,
+.input_field:not(:placeholder-shown) + .input_label {
+    transform: translate(10%, -30%) scale(0.8);
+    color: var(--card-primary-color);
+    padding: 0;
+    margin: 0 1rem;
+    background-color: var(--card-third-color);
+    border-radius: 0.2rem;
+} 
+
+.card-left-content .input_field {
+    all: unset;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    border: 0.13rem solid var(--card-secondary-color);
+    padding: 0.4rem 0.5rem;
+    background-color: var(--card-third-color);
+    transition: all 0.2s ease-in-out;
+    border-radius: 0.2rem;
+    background-color: transparent;
+}
+
+.card-left-content .input_ {
+    position: relative;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+}
+
+/* Styling for Select Dropdown */
+.card-left-content .input_ select {
+    all: unset;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    border: 0.13rem solid var(--card-secondary-color);
+    padding: 0.4rem 0.5rem;
+    background-color: var(--card-third-color);
+    transition: all 0.2s ease-in-out;
+    border-radius: 0.2rem;
+    background-color: transparent;
+    transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.card-left-content .input_ select:focus {
+    background-color: var(--card-primary-color);
+    color: var(--card-secondary-color);
+}
+
+.card-left-content .input_ select option {
+    background-color: var(--card-primary-color);
+    color: var(--card-secondary-color);
+}
+.card-left-content .input_ select option:hover {
+    background-color: var(--card-third-color);
+    color: var(--card-prmary-color);
+}
+
+.card-left-content .input_ .input_label {
+    display: block;
+    font-weight: bold;
+    scale: 0.8;
+    color: var(--card-secondary-color);
+    white-space: nowrap;
+}
+
+.card-right {    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40%;
+    height: 100%;
+    background-color: var(--card-primary-color);
+    color: var(--card-secondary-color);
+    padding: 2rem;
+}
+
+.card-right-content-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 0.2rem;
+    cursor: pointer;
+}
+
+.card-right-content-button button {
+    all: unset;
+    font-weight: 800;
+    font-size: 2rem;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 0.3rem solid var(--card-secondary-color);
+    color: var(--card-secondary-color);
+    transition: all 0.2s ease-in-out;
+}
+
+.card-right-content-button button:hover {
+    background-color: var(--card-secondary-color);
+    color: var(--card-prmary-color);
+    animation: bounceScale 0.6s ease-in-out;
+    scale: 1.3;
+    width: 70%;
+    height: 70%;
+}
+/* Keyframes untuk efek bouncing scale */
+@keyframes bounceScale {
+    0% {
+      transform: scale(1); /* Skala awal */
+    }
+    30% {
+      transform: scale(1.4); /* Membesar sedikit */
+    }
+    50% {
+      transform: scale(0.95); /* Mengecil sebentar */
+    }
+    70% {
+      transform: scale(1.2); /* Membesar sedikit */
+    }
+    100% {
+      transform: scale(1); /* Kembali ke skala normal */
+    }
+  }
+
+.tickets-container {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
+}
+
+.ticket-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.ticket-wrapper img {
+    width: 100%;
+    height: 100%;
+}
+
+.divider {
+    display: flex;
+    width: 100%;
+    height: 0.2rem;
+    margin: 5rem;
+    background-color: var(--card-third-color);
+}
+
+.scan-containner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 4px solid var(--card-third-color);
+    border-radius: 0.2rem;
+    padding: 0.5rem 1.5rem;
+    background-color: var(--card-prmary-color);
+    min-height: 2.5rem;
+    max-height: 15rem;
+    width: 50rem;
+    box-sizing: border-box;
+    overflow: hidden; /* Tambahkan scroll jika log terlalu panjang */
+}
+
+.scan-containner .scan-btn {
+    all: unset;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    color: var(--card-secondary-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 2.5rem;
+    border-radius: 0.2rem;
+    background-color: var(--card-prmary-color);
+    overflow: hidden;
+}
+
+.scan-containner .btn-container:hover {
+    color: var(--card-secondary-color);
+    animation: bounceScale 0.6s ease-in-out;
+}
+
+#qr-file {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#scan-result {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-top: 1rem;
+    box-sizing: border-box;
+}
+
+.log-container {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    margin-top: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.2rem;
+    padding: 0.5rem 1.5rem;
+    background-color: var(--card-prmary-color);
+    min-height: 2.5rem;
+    max-height: 10rem;
+    width: 100%;
+    overflow-y: auto; /* Tambahkan scroll jika log terlalu panjang */
+    z-index: 99;
+}
+
+.log-container.visible {
+    display: block;
+}
+
+.log-details {
+    margin-left: 1.5rem;
+}
