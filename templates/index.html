@@ -231,9 +231,11 @@
                             scanResultContainer.innerHTML += decryptedResult; // Tambahkan hasil dekripsi ke UI
                             addLog("Data berhasil didekripsi.", decryptedResult);
                         } else {
-                            console.error("Error dari server:", result.message);
-                            scanResultContainer.innerHTML = `<p><strong>Error:</strong> ${result.message}</p>`;
+                            scanResultContainer.innerHTML = `
+                                <p><strong>Hasil Scan:</strong> ${cleanedData}</p>
+                                <p><strong>Error:</strong> ${result.message}</p>`;
                             addLog("Error dari server:", result.message);
+                            addLog("Hasil Scan:", result.barcode_content);
                         }
                     })
                     .catch(err => {

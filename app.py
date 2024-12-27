@@ -14,7 +14,24 @@ app = Flask(__name__)
 
 # Kunci enkripsi (gunakan key derivation untuk keamanan tambahan)
 PASSWORD = "super_secure_password"
-SALT = os.urandom(16)
+SALT = b"this_is_a_fixed_salt"  # Panjang 16 byte
+
+TMP_DIR = '/tmp'
+SALT_FILE = os.path.join(TMP_DIR, "salt.bin")
+
+# Pastikan SALT disimpan atau dimuat
+def get_or_create_salt():
+    if os.path.exists(SALT_FILE):
+        with open(SALT_FILE, "rb") as f:
+            return f.read()
+    else:
+        salt = os.urandom(16)
+        with open(SALT_FILE, "wb") as f:
+            f.write(salt)
+        return salt
+
+# Gunakan fungsi ini untuk mendapatkan SALT
+SALT = get_or_create_salt()
 
 # Fungsi untuk menghasilkan kunci AES
 def generate_key(password, salt):
@@ -31,7 +48,6 @@ SECRET_KEY = generate_key(PASSWORD, SALT)
 
 # Konfigurasi Database
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-TMP_DIR = '/tmp'  # Direktori sementara untuk database di Vercel
 DB_PATH = os.path.join(TMP_DIR, "tiket_konser.db")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
@@ -77,6 +93,11 @@ def generate_ticket_id():
 # Route untuk halaman utama
 @app.route('/')
 def home():
+    return render_template('flowchart.html')
+
+# Route untuk halaman tiket
+@app.route('/index')
+def index():
     return render_template('index.html')
 
 # Route untuk generate QR code
@@ -163,14 +184,21 @@ def decrypt_qr():
     except Exception as e:
         # Jika ada kesalahan dalam proses dekripsi
         print(f"Error decrypting data: {e}")
-        return jsonify({'status': 'error', 'message': 'Dekripsi gagal atau data tidak valid'}), 400
+        return jsonify({'status': 'error', 'message': 'Dekripsi gagal atau data tidak valid', 'barcode_content': encrypted_data}), 400
 
 
-if not os.path.exists(DB_PATH):
-    os.makedirs(TMP_DIR, exist_ok=True)  # Pastikan direktori /tmp ada
+# Pastikan database dan tabel selalu tersedia
+def ensure_database():
+    if not os.path.exists(DB_PATH):  # Periksa apakah file database ada
+        os.makedirs(TMP_DIR, exist_ok=True)  # Buat direktori jika belum ada
     with app.app_context():
-        db.create_all()
-        print(f"Database created at: {DB_PATH}")
+        inspector = db.inspect(db.engine)
+        if not inspector.has_table("tiket"):  # Periksa apakah tabel "tiket" ada
+            db.create_all()
+            print(f"Database and table created at: {DB_PATH}")
+
+# Panggil fungsi untuk memastikan database dan tabel dibuat
+ensure_database()
 
 if __name__ == '__main__':
     app.run(debug=False)
